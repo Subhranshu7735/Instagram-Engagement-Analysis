@@ -1,0 +1,65 @@
+-- Q1. FINDING 5 OLDEST USERS
+select * from users 
+order by created_at 
+limit 5;
+
+-- Q2. MOST POPULAR REGISTRATION DATE FOR INSTAGRAM LIVE
+select 
+	dayname(created_at) as day_name, 
+    count(*) as count_day 
+    from users group by dayname(created_at) 
+    order by count_day desc;
+
+-- Q3. IDENTIFYING INACTIVE USERS
+select username, image_url from users
+left join photos on users.id = photos.user_id 
+where photos.id is null;    
+
+select username, photo_id from users
+join likes on users.id = likes.user_id limit 5;
+
+-- Q4. IDENTIFY MOST POPULAR PHOTO WHO GOT MOST LIKE (AND USER WHO CREATED IT)
+select 
+		photos.id, 
+        username,
+        photos.image_url,
+        count(*) as count
+from photos
+inner join likes 
+	on likes.photo_id = photos.id 
+inner join users 
+	on users.id = photos.user_id
+group by photos.id
+order by count desc limit 1;
+
+-- Q5. HOW MANY TIMES DOES THE AVARAGE USER POST?
+select
+	(select count(*) from photos) /
+						(select count(*) from users) as avg;
+                        
+-- Q5. FIND THE PERSON WHO DID MAXIMUM POST
+select 
+	username,
+    user_id, 
+    count(*) as max_post
+    from photos
+    join users on users.id = photos.user_id
+    group by user_id 
+    order by max_post desc 
+limit 1;
+
+-- Q6. WHAT ARE THE TOP 5 HASHTAG WHICH IS BEING USED MOSTLY
+select 
+		tag_id,
+		tag_name,
+        count(*) as total
+	from photo_tags
+    join tags on tags.id = photo_tags.tag_id
+    group by tag_id
+    order by total desc limit 5;
+
+-- Q7. FIND PERSON WHO HAS LIKED ALL PHOTOS
+select username,user_id,count(*) as like_count from likes
+join users on users.id = likes.user_id
+group by user_id
+having like_count = (select count(*) from photos);
